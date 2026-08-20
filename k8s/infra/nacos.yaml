@@ -1,0 +1,64 @@
+# Standalone Nacos with embedded storage: suitable for this local learning cluster only.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nacos
+  namespace: bank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nacos
+  template:
+    metadata:
+      labels:
+        app: nacos
+    spec:
+      containers:
+        - name: nacos
+          image: nacos/nacos-server:v2.5.0
+          ports:
+            - containerPort: 8848
+            - containerPort: 9848
+            - containerPort: 9849
+          env:
+            - name: MODE
+              value: standalone
+            - name: NACOS_AUTH_ENABLE
+              value: "false"
+            - name: JVM_XMS
+              value: 256m
+            - name: JVM_XMX
+              value: 256m
+          readinessProbe:
+            httpGet:
+              path: /nacos/actuator/health
+              port: 8848
+            initialDelaySeconds: 45
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos
+  namespace: bank
+spec:
+  selector:
+    app: nacos
+  ports:
+    - name: http
+      port: 8848
+      targetPort: 8848
+    # Nacos 2.x clients use gRPC for naming/config communication.
+    - name: grpc-client
+      port: 9848
+      targetPort: 9848
+    - name: grpc-server
+      port: 9849
+      targetPort: 9849

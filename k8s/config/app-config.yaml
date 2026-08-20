@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bank-app-config
+  namespace: bank
+data:
+  NACOS_SERVER_ADDR: nacos:8848
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  ROCKETMQ_NAME_SERVER: rocketmq-nameserver:9876
+  SMS_MQ_ENABLED: "true"
+  SMS_TOPIC: bank-sms-topic
+  SMS_ACCOUNT_OPENED_TAG: ACCOUNT_OPENED
+  SMS_CONSUMER_GROUP: customer-service-sms-consumer
+  SMS_MAX_RETRY_COUNT: "3"

@@ -1,0 +1,28 @@
+# The MySQL server runs on the Windows host. This Service gives Pods a stable
+# in-cluster name: mysql.bank.svc.cluster.local (short form: mysql).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: bank
+spec:
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: mysql-windows-host
+  namespace: bank
+  labels:
+    kubernetes.io/service-name: mysql
+addressType: IPv4
+ports:
+  - name: mysql
+    protocol: TCP
+    port: 3306
+endpoints:
+  - addresses:
+      - 192.168.30.1

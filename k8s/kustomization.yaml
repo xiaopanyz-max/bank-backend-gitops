@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - config/app-config.yaml
+  - infra/mysql-external.yaml
+  - infra/nacos.yaml
+  - infra/rocketmq.yaml
+  - apps/customer-service.yaml
+  - apps/account-service.yaml
+  - apps/api-gateway.yaml
+  - observability/fluent-bit.yaml
+
+# These tags are changed only by the CI deployment job.  A fixed tag makes a
+# Git change visible to Argo CD and gives every deployed version a traceable ID.
+images:
+  - name: ghcr.io/xiaopanyz-max/bank-customer-service
+    newTag: sha-b33d253b6270c1b68fbf12a699ef6cdc00d5ea72
+  - name: ghcr.io/xiaopanyz-max/bank-account-service
+    newTag: sha-b33d253b6270c1b68fbf12a699ef6cdc00d5ea72
+  - name: ghcr.io/xiaopanyz-max/bank-api-gateway
+    newTag: sha-b33d253b6270c1b68fbf12a699ef6cdc00d5ea72

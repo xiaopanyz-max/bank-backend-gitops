@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocketmq-nameserver
+  namespace: bank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq-nameserver
+  template:
+    metadata:
+      labels:
+        app: rocketmq-nameserver
+    spec:
+      containers:
+        - name: nameserver
+          image: apache/rocketmq:4.9.7
+          command: ["sh", "-c", "NAMESRV_BIN=$(find /home/rocketmq -path '*/bin/mqnamesrv' -type f | head -1); echo using $NAMESRV_BIN; sh $NAMESRV_BIN"]
+          ports:
+            - containerPort: 9876
+          readinessProbe:
+            tcpSocket:
+              port: 9876
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocketmq-nameserver
+  namespace: bank
+spec:
+  selector:
+    app: rocketmq-nameserver
+  ports:
+    - port: 9876
+      targetPort: 9876
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rocketmq-broker-config
+  namespace: bank
+data:
+  broker.conf: |
+    brokerClusterName=bank-local-cluster
+    brokerName=broker-a
+    brokerId=0
+    namesrvAddr=rocketmq-nameserver:9876
+    listenPort=10911
+    storePathRootDir=/home/rocketmq/store
+    storePathCommitLog=/home/rocketmq/store/commitlog
+    storePathConsumeQueue=/home/rocketmq/store/consumequeue
+    storePathIndex=/home/rocketmq/store/index
+    storeCheckpoint=/home/rocketmq/store/checkpoint
+    abortFile=/home/rocketmq/store/abort
+    autoCreateTopicEnable=true
+    autoCreateSubscriptionGroup=true
+    deleteWhen=04
+    fileReservedTime=48
+    brokerRole=ASYNC_MASTER
+    flushDiskType=ASYNC_FLUSH
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocketmq-broker
+  namespace: bank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketmq-broker
+  template:
+    metadata:
+      labels:
+        app: rocketmq-broker
+    spec:
+      containers:
+        - name: broker
+          image: apache/rocketmq:4.9.7
+          command: ["sh", "-c", "BROKER_BIN=$(find /home/rocketmq -path '*/bin/mqbroker' -type f | head -1); echo using $BROKER_BIN; sh $BROKER_BIN -c /home/rocketmq/conf/broker.conf"]
+          # The Spring RocketMQ client uses the Broker remoting protocol directly.
+          # Keep this local learning deployment to a Broker only; the optional Proxy
+          # requires extra configuration and is unnecessary here.
+          env:
+            - name: NAMESRV_ADDR
+              value: rocketmq-nameserver:9876
+            # RocketMQ's stock Broker startup script defaults to an 8 GiB heap.
+            # Override it for this 8 GiB single-node learning VM.
+            - name: JAVA_OPT_EXT
+              value: "-Xms256m -Xmx256m -Xmn128m -XX:MaxDirectMemorySize=256m -XX:-AlwaysPreTouch"
+          ports:
+            - containerPort: 10911
+            - containerPort: 10909
+            - containerPort: 10912
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "SHUTDOWN_BIN=$(find /home/rocketmq -path '*/bin/mqshutdown' -type f | head -1); if [ -n \"$SHUTDOWN_BIN\" ]; then sh $SHUTDOWN_BIN broker; fi"]
+          volumeMounts:
+            - name: broker-config
+              mountPath: /home/rocketmq/conf/broker.conf
+              subPath: broker.conf
+            - name: data
+              mountPath: /home/rocketmq/store
+            - name: logs
+              mountPath: /home/rocketmq/logs
+          readinessProbe:
+            tcpSocket:
+              port: 10911
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 768Mi
+      volumes:
+        - name: broker-config
+          configMap:
+            name: rocketmq-broker-config
+        - name: data
+          hostPath:
+            path: /var/lib/bank-k8s/rocketmq
+            type: DirectoryOrCreate
+        - name: logs
+          hostPath:
+            path: /var/log/bank-k8s/rocketmq
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocketmq-broker
+  namespace: bank
+spec:
+  selector:
+    app: rocketmq-broker
+  ports:
+    - name: remoting
+      port: 10911
+      targetPort: 10911
