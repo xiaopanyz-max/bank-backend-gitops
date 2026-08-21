@@ -38,6 +38,26 @@ kubectl apply -k k8s/
 kubectl get pods -n bank -w
 ```
 
+## 环境与日志级别
+
+当前本地集群按 SIT 环境运行。三个环境的差异配置放在：
+
+- `config/env-sit.yaml`：SIT，业务包 `com.example.bank` 使用 `DEBUG`，方便本地联调和排查。
+- `config/env-uat.yaml`：UAT，业务包使用 `INFO`，接近准生产验证。
+- `config/env-prd.yaml`：PRD，根日志使用 `WARN`，业务包使用 `INFO`，降低生产日志噪音。
+
+业务服务通过 Deployment 的 `envFrom` 引入当前环境配置：
+
+```yaml
+envFrom:
+  - configMapRef:
+      name: bank-app-config
+  - configMapRef:
+      name: bank-env-sit-config
+```
+
+如果后面要切到 UAT 或 PRD，把三个业务 Deployment 中的 `bank-env-sit-config` 分别改成 `bank-env-uat-config` 或 `bank-env-prd-config`，然后提交 GitOps 仓库。Argo CD 同步后会让 Pod 使用新的日志级别。
+
 所有 Pod 运行后，从 Windows 访问：
 
 ```text

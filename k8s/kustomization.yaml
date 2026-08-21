@@ -3,6 +3,9 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - config/app-config.yaml
+  - config/env-sit.yaml
+  - config/env-uat.yaml
+  - config/env-prd.yaml
   - infra/mysql-external.yaml
   - infra/nacos.yaml
   - infra/rocketmq.yaml

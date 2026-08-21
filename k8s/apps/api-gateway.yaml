@@ -21,6 +21,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: bank-app-config
+            - configMapRef:
+                name: bank-env-sit-config
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness

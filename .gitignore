@@ -1,2 +1,7 @@
 k8s/config/secret.yaml
 
+# IDE and operating-system files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

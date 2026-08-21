@@ -21,6 +21,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: bank-app-config
+            - configMapRef:
+                name: bank-env-sit-config
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://mysql:3306/bank_account?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
