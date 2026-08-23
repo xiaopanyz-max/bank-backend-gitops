@@ -5,6 +5,16 @@ metadata:
   namespace: bank
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: customer-service
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 1Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -13,6 +23,16 @@ metadata:
   namespace: bank
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: account-service
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 1Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -21,3 +41,13 @@ metadata:
   namespace: bank
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: api-gateway
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 1Gi
