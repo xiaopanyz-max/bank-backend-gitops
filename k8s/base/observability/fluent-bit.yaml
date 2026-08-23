@@ -82,7 +82,7 @@ data:
     [OUTPUT]
         Name                es
         Match               kube.*
-        Host                172.30.38.23
+        Host                172.31.176.1
         Port                9200
         Index               bank-k8s-logs
         Logstash_Format     On
