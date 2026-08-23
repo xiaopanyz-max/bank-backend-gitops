@@ -1,10 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bank-env-prd-config
+  name: bank-env-config
   namespace: bank
 data:
   APP_ENV: PRD
+  CLUSTER_NAME: bank-prd-a
   SPRING_PROFILES_ACTIVE: prd
   LOGGING_LEVEL_ROOT: WARN
   LOGGING_LEVEL_COM_EXAMPLE_BANK: INFO

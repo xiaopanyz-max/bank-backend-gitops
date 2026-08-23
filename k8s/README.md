@@ -13,7 +13,7 @@
 
 1. Windows 的 MySQL 已运行。Kubernetes 经 Windows 的受限端口转发访问 `192.168.30.1:3306`，而 MySQL 本身仍只监听本机回环地址。
 2. 已创建只允许 K8s NAT 网段访问的 `bank_k8s` 数据库账号，并初始化 `bank_dev`、`bank_account`。
-3. 将 `config/secret.example.yaml` 复制为 `config/secret.yaml`，填入该账号密码；此文件不会提交 Git。
+3. 将 `base/config/secret.example.yaml` 复制为 `base/config/secret.yaml`，填入该账号密码；此文件不会提交 Git。
 4. GitHub Actions 已成功将三张业务镜像推送至 GHCR。
 5. GHCR 包对本地集群可拉取。公开包可直接拉取；私有包需先配置 `imagePullSecret`。
 6. Windows 的 MyClash 与 NAT 代理保持启动，以便 containerd 拉取镜像。
@@ -26,25 +26,26 @@
 2. 执行应用仓库 `bank-backend-springboot/database/schema.sql`：创建客户库表。
 3. 执行应用仓库 `bank-backend-springboot/account-service/database/schema.sql`：创建账户库表。
 
-随后将同一账号和密码填入 `config/secret.yaml`。不要把真实密码写进示例 SQL 或提交到 Git。
+随后将同一账号和密码填入 `base/config/secret.yaml`。不要把真实密码写进示例 SQL 或提交到 Git。
 
 ## 部署
 
 在 Ubuntu 节点执行：
 
 ```bash
-kubectl apply -f k8s/config/secret.yaml
+kubectl apply -f k8s/base/config/secret.yaml
 kubectl apply -k k8s/
 kubectl get pods -n bank -w
 ```
 
 ## 环境与日志级别
 
-当前本地集群按 SIT 环境运行。三个环境的差异配置放在：
+当前 `k8s/kustomization.yaml` 指向 `overlays/sit-cluster-a`，所以本地集群按 SIT 集群 A 运行。公共配置和环境差异拆分为：
 
-- `config/env-sit.yaml`：SIT，业务包 `com.example.bank` 使用 `DEBUG`，方便本地联调和排查。
-- `config/env-uat.yaml`：UAT，业务包使用 `INFO`，接近准生产验证。
-- `config/env-prd.yaml`：PRD，根日志使用 `WARN`，业务包使用 `INFO`，降低生产日志噪音。
+- `base/`：所有环境共用的 Deployment、Service、Nacos、RocketMQ、MySQL 映射和日志采集配置。
+- `overlays/sit-cluster-a/env-config.yaml`：SIT 集群 A，业务包 `com.example.bank` 使用 `DEBUG`，方便本地联调和排查。
+- `overlays/uat/env-config.yaml`：UAT，业务包使用 `INFO`，接近准生产验证。
+- `overlays/prd/env-config.yaml`：PRD，根日志使用 `WARN`，业务包使用 `INFO`，降低生产日志噪音。
 
 业务服务通过 Deployment 的 `envFrom` 引入当前环境配置：
 
@@ -53,10 +54,10 @@ envFrom:
   - configMapRef:
       name: bank-app-config
   - configMapRef:
-      name: bank-env-sit-config
+      name: bank-env-config
 ```
 
-如果后面要切到 UAT 或 PRD，把三个业务 Deployment 中的 `bank-env-sit-config` 分别改成 `bank-env-uat-config` 或 `bank-env-prd-config`，然后提交 GitOps 仓库。Argo CD 同步后会让 Pod 使用新的日志级别。
+如果后面要切到 UAT 或 PRD，修改根目录 `k8s/kustomization.yaml` 的 `resources`，从 `overlays/sit-cluster-a` 切到 `overlays/uat` 或 `overlays/prd`，然后提交 GitOps 仓库。Argo CD 同步后会让 Pod 使用新的环境配置。
 
 所有 Pod 运行后，从 Windows 访问：
 
@@ -75,6 +76,6 @@ GET  /api/transactions/{id}/with-balance
 
 ## 本地与生产差异
 
-- MySQL 位于 Windows 主机，`EndpointSlice` 使用 VMware NAT 网关地址 `192.168.30.1`；若 VMware NAT 网段改变，需要同步修改 `infra/mysql-external.yaml`。
-- `config/secret.yaml` 必须在本地创建，绝不可提交到 Git；仓库只保留安全的示例文件。
+- MySQL 位于 Windows 主机，`EndpointSlice` 使用 VMware NAT 网关地址 `192.168.30.1`；若 VMware NAT 网段改变，需要同步修改 `base/infra/mysql-external.yaml`。
+- `base/config/secret.yaml` 必须在本地创建，绝不可提交到 Git；仓库只保留安全的示例文件。
 - Nacos、RocketMQ 都是单副本；生产应按各组件的高可用方案部署。
