@@ -76,6 +76,13 @@ k8s/overlays/sit-cluster-b
 
 这是第一台 Windows 在当前热点/WLAN 网络里的地址。如果热点 IP 变化，需要同步更新 `overlays/sit-cluster-b/kustomization.yaml` 中的 MySQL EndpointSlice patch。
 
+cluster-b 当前作为副集群使用，计划只承接约 25% 流量，因此资源配置比 cluster-a 更轻：
+
+- 业务服务：`replicas=1`，`requests.cpu=50m`，`requests.memory=256Mi`。
+- Nacos / RocketMQ：`replicas=1`，`requests.cpu=100m`，`requests.memory=384Mi`。
+
+目的：在 4G 左右内存的学习 VM 上保留双集群能力，同时避免因为资源 request 过高导致 Pod `Pending`。
+
 所有 Pod 运行后，从 Windows 访问：
 
 ```text
