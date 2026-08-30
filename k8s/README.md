@@ -80,8 +80,18 @@ cluster-b 当前作为副集群使用，计划只承接约 25% 流量，因此�
 
 - 业务服务：`replicas=1`，`requests.cpu=50m`，`requests.memory=256Mi`。
 - Nacos / RocketMQ：`replicas=1`，`requests.cpu=100m`，`requests.memory=384Mi`。
+- Deployment 策略：`Recreate`，更新时先停旧 Pod 再起新 Pod，避免 4G 学习 VM 因滚动发布临时双倍 Pod 而 `Insufficient cpu`。
 
 目的：在 4G 左右内存的学习 VM 上保留双集群能力，同时避免因为资源 request 过高导致 Pod `Pending`。
+
+cluster-b 首次部署前仍然需要手动创建数据库 Secret。Secret 不提交到 GitOps 仓库：
+
+```bash
+kubectl create namespace bank --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic bank-local-secrets -n bank \
+  --from-literal=MYSQL_USERNAME=bank_k8s \
+  --from-literal=MYSQL_PASSWORD='替换成真实 MySQL 密码'
+```
 
 所有 Pod 运行后，从 Windows 访问：
 
