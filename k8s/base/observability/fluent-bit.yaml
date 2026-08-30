@@ -101,7 +101,9 @@ data:
     [PARSER]
         Name        spring_log_level
         Format      regex
-        Regex       ^(?<app_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\[(?<thread>[^\]]+)\]\s+(?<log_level>TRACE|DEBUG|INFO|WARN|ERROR)\s+(?<logger>[^ ]+)\s+-\s+(?<message>.*)$
+        Regex       ^(?<app_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+env=(?<env>[^ ]*)\s+cluster=(?<cluster>[^ ]*)\s+pod=(?<pod>[^ ]*)\s+podIp=(?<pod_ip>[^ ]*)\s+node=(?<node>[^ ]*)\s+traceId=(?<trace_id>[^ ]*)\s+globalSerialNo=(?<global_serial_no>[^ ]*)\s+method=(?<http_method>[^ ]*)\s+path=(?<request_path>[^ ]*)\s+status=(?<http_status>[^ ]*)\s+costMs=(?<cost_ms>[^ ]*)\s+\[(?<thread>[^\]]+)\]\s+(?<log_level>TRACE|DEBUG|INFO|WARN|ERROR)\s+(?<logger>[^ ]+)\s+-\s+(?<message>.*)$
+        Time_Key    app_time
+        Time_Format %Y-%m-%d %H:%M:%S.%L
 ---
 apiVersion: apps/v1
 kind: DaemonSet

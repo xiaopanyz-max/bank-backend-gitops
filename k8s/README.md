@@ -84,6 +84,13 @@ k8s/overlays/sit-cluster-b
 
 cluster-a 和 cluster-b 默认使用同一个 ES 日志入口。如果 Kibana 能打开但查不到日志，先看 `kubectl logs -n logging ds/fluent-bit --tail=120`；若日志里仍然连接旧地址或超时，需要同步更新 `base/observability/fluent-bit.yaml` 中的 Fluent Bit ES Host。
 
+Fluent Bit 会把业务日志中的环境和链路字段解析成 Elasticsearch 字段，例如 `env`、`cluster`、`pod`、`pod_ip`、`node`、`trace_id`、`global_serial_no`、`request_path`、`http_status`。Kibana 精确过滤时优先使用 `.keyword` 字段，例如：
+
+```text
+cluster.keyword : "bank-sit-b"
+trace_id.keyword : "xxx"
+```
+
 cluster-b 当前作为副集群使用，计划只承接约 25% 流量，因此资源配置比 cluster-a 更轻：
 
 - 业务服务：`replicas=1`，`requests.cpu=50m`，`requests.memory=256Mi`。
