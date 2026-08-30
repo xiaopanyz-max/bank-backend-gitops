@@ -15,6 +15,61 @@ patches:
         path: /endpoints/0/addresses/0
         value: 10.46.132.206
   - target:
+      version: v1
+      kind: ConfigMap
+      name: fluent-bit-config
+      namespace: logging
+    patch: |-
+      - op: replace
+        path: /data/fluent-bit.conf
+        value: |
+          [SERVICE]
+              Flush         5
+              Daemon        Off
+              Log_Level     info
+              Parsers_File  parsers.conf
+
+          [INPUT]
+              Name              tail
+              Tag               kube.*
+              Path              /var/log/containers/*_bank_*.log
+              Parser            cri
+              DB                /tmp/flb_kube_bank.db
+              Mem_Buf_Limit     20MB
+              Skip_Long_Lines   On
+              Refresh_Interval  10
+
+          [FILTER]
+              Name                kubernetes
+              Match               kube.*
+              Kube_URL            https://kubernetes.default.svc:443
+              Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+              Kube_Tag_Prefix     kube.var.log.containers.
+              Merge_Log           On
+              Keep_Log            On
+              Labels              On
+              Annotations         Off
+
+          [FILTER]
+              Name                parser
+              Match               kube.*
+              Key_Name            log
+              Parser              spring_log_level
+              Reserve_Data        On
+              Preserve_Key        On
+
+          [OUTPUT]
+              Name                es
+              Match               kube.*
+              Host                10.46.132.23
+              Port                9200
+              Index               bank-k8s-logs
+              Logstash_Format     On
+              Logstash_Prefix     bank-k8s
+              Suppress_Type_Name  On
+              Retry_Limit         False
+  - target:
       group: apps
       version: v1
       kind: Deployment

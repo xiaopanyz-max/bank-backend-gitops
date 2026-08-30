@@ -76,6 +76,14 @@ k8s/overlays/sit-cluster-b
 
 这是第一台 Windows 在当前热点/WLAN 网络里的地址。如果热点 IP 变化，需要同步更新 `overlays/sit-cluster-b/kustomization.yaml` 中的 MySQL EndpointSlice patch。
 
+当前 cluster-b overlay 也将 Fluent Bit 的 Elasticsearch 输出地址替换为：
+
+```text
+10.46.132.23:9200
+```
+
+如果 Kibana 能打开但查不到 cluster-b 日志，先看 `kubectl logs -n logging ds/fluent-bit --tail=120`；若日志里仍然连接旧地址或超时，需要同步更新 `overlays/sit-cluster-b/kustomization.yaml` 中的 Fluent Bit ConfigMap patch。
+
 cluster-b 当前作为副集群使用，计划只承接约 25% 流量，因此资源配置比 cluster-a 更轻：
 
 - 业务服务：`replicas=1`，`requests.cpu=50m`，`requests.memory=256Mi`。
