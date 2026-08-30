@@ -40,10 +40,11 @@ kubectl get pods -n bank -w
 
 ## 环境与日志级别
 
-当前 `k8s/kustomization.yaml` 指向 `overlays/sit-cluster-a`，所以本地集群按 SIT 集群 A 运行。公共配置和环境差异拆分为：
+当前 `k8s/kustomization.yaml` 指向 `overlays/sit-cluster-a`，所以默认本地集群按 SIT 集群 A 运行。公共配置和环境差异拆分为：
 
 - `base/`：所有环境共用的 Deployment、Service、Nacos、RocketMQ、MySQL 映射和日志采集配置。
 - `overlays/sit-cluster-a/env-config.yaml`：SIT 集群 A，业务包 `com.example.bank` 使用 `DEBUG`，方便本地联调和排查。
+- `overlays/sit-cluster-b/env-config.yaml`：SIT 集群 B，业务包 `com.example.bank` 使用 `DEBUG`，用于第二个 Kubernetes 集群接入双集群演练。
 - `overlays/uat/env-config.yaml`：UAT，业务包使用 `INFO`，接近准生产验证。
 - `overlays/prd/env-config.yaml`：PRD，根日志使用 `WARN`，业务包使用 `INFO`，降低生产日志噪音。
 
@@ -58,6 +59,22 @@ envFrom:
 ```
 
 如果后面要切到 UAT 或 PRD，修改根目录 `k8s/kustomization.yaml` 的 `resources`，从 `overlays/sit-cluster-a` 切到 `overlays/uat` 或 `overlays/prd`，然后提交 GitOps 仓库。Argo CD 同步后会让 Pod 使用新的环境配置。
+
+第二个集群不要修改根目录 `k8s/kustomization.yaml`，而是让 cluster-b 的 Argo CD Application 直接指向：
+
+```text
+k8s/overlays/sit-cluster-b
+```
+
+这样 cluster-a 和 cluster-b 可以共享同一套 base，但各自使用不同 overlay。
+
+当前 cluster-b overlay 已将 MySQL EndpointSlice 地址替换为：
+
+```text
+10.46.132.206:3306
+```
+
+这是第一台 Windows 在当前热点/WLAN 网络里的地址。如果热点 IP 变化，需要同步更新 `overlays/sit-cluster-b/kustomization.yaml` 中的 MySQL EndpointSlice patch。
 
 所有 Pod 运行后，从 Windows 访问：
 
@@ -76,6 +93,6 @@ GET  /api/transactions/{id}/with-balance
 
 ## 本地与生产差异
 
-- MySQL 位于 Windows 主机，`EndpointSlice` 使用 VMware NAT 网关地址 `192.168.30.1`；若 VMware NAT 网段改变，需要同步修改 `base/infra/mysql-external.yaml`。
+- MySQL 位于 Windows 主机，`EndpointSlice` 默认使用 cluster-a 的 VMware NAT 网关地址 `192.168.30.1`；若 cluster-b 不能访问该地址，需要在 cluster-b overlay 中增加 MySQL EndpointSlice patch，改成 cluster-b 能访问到的 MySQL 地址。
 - `base/config/secret.yaml` 必须在本地创建，绝不可提交到 Git；仓库只保留安全的示例文件。
 - Nacos、RocketMQ 都是单副本；生产应按各组件的高可用方案部署。
