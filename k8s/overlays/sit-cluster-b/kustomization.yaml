@@ -99,3 +99,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: 768Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: "-Xms128m -Xmx128m -Xmn64m -XX:MaxDirectMemorySize=128m -XX:-AlwaysPreTouch"
