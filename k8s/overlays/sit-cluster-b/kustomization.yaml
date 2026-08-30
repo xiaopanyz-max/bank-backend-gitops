@@ -92,13 +92,13 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
-        value: 100m
+        value: 50m
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/memory
-        value: 384Mi
+        value: 256Mi
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
-        value: 768Mi
+        value: 512Mi
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
-        value: "-Xms128m -Xmx128m -Xmn64m -XX:MaxDirectMemorySize=128m -XX:-AlwaysPreTouch"
+        value: "-Xms96m -Xmx128m -Xmn32m -XX:MaxDirectMemorySize=64m -XX:-AlwaysPreTouch -XX:ParallelGCThreads=1 -XX:ConcGCThreads=1"
