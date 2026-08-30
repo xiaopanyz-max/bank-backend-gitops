@@ -81,6 +81,7 @@ cluster-b 当前作为副集群使用，计划只承接约 25% 流量，因此�
 - 业务服务：`replicas=1`，`requests.cpu=50m`，`requests.memory=256Mi`。
 - Nacos / RocketMQ：`replicas=1`，`requests.cpu=100m`，`requests.memory=384Mi`。
 - RocketMQ Broker JVM：cluster-b 覆盖为 `-Xms96m -Xmx128m -Xmn32m -XX:MaxDirectMemorySize=64m -XX:-AlwaysPreTouch -XX:ParallelGCThreads=1 -XX:ConcGCThreads=1`，避免副集群 4G 学习 VM 被 Broker 默认内存配置拖垮。
+- RocketMQ Broker hostPath：cluster-b 通过 initContainer 在 Pod 启动前修正 `/var/lib/bank-k8s/rocketmq` 和 `/var/log/bank-k8s/rocketmq` 权限，避免新节点上 `DirectoryOrCreate` 创建 root 目录后 Broker 无法写入而秒退。
 - Deployment 策略：`Recreate`，更新时先停旧 Pod 再起新 Pod，避免 4G 学习 VM 因滚动发布临时双倍 Pod 而 `Insufficient cpu`。
 
 目的：在 4G 左右内存的学习 VM 上保留双集群能力，同时避免因为资源 request 过高导致 Pod `Pending`。

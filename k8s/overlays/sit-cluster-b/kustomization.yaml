@@ -102,3 +102,19 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "-Xms96m -Xmx128m -Xmn32m -XX:MaxDirectMemorySize=64m -XX:-AlwaysPreTouch -XX:ParallelGCThreads=1 -XX:ConcGCThreads=1"
+      - op: add
+        path: /spec/template/spec/initContainers
+        value:
+          - name: init-rocketmq-hostpath
+            image: busybox:1.36
+            command:
+              - sh
+              - -c
+              - chmod -R 0777 /rocketmq-store /rocketmq-logs
+            securityContext:
+              runAsUser: 0
+            volumeMounts:
+              - name: data
+                mountPath: /rocketmq-store
+              - name: logs
+                mountPath: /rocketmq-logs
