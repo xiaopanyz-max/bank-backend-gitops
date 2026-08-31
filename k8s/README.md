@@ -118,6 +118,20 @@ kubectl create secret generic bank-local-secrets -n bank \
 http://192.168.30.130:30080
 ```
 
+如果同时运行 cluster-a 和 cluster-b，建议不要直接打某个集群的 NodePort，而是使用本机 nginx 统一入口：
+
+```text
+http://127.0.0.1:18080
+```
+
+nginx 配置由 GitOps 仓库管理，位置是：
+
+```text
+infra/nginx/nginx.conf
+```
+
+当前灰度比例约为 cluster-a 75%、cluster-b 25%。业务日志中通过 `cluster=bank-sit-a` 和 `cluster=bank-sit-b` 区分请求实际落到哪个集群。
+
 网关路由示例：
 
 ```text
