@@ -7,8 +7,8 @@ resources:
 # Git change visible to Argo CD and gives every deployed version a traceable ID.
 images:
   - name: ghcr.io/xiaopanyz-max/bank-customer-service
-    newTag: sha-76b56366419427f796b5a468ae307c4a2e877d50
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
   - name: ghcr.io/xiaopanyz-max/bank-account-service
-    newTag: sha-76b56366419427f796b5a468ae307c4a2e877d50
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
   - name: ghcr.io/xiaopanyz-max/bank-api-gateway
-    newTag: sha-76b56366419427f796b5a468ae307c4a2e877d50
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
