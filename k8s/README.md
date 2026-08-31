@@ -68,6 +68,8 @@ k8s/overlays/sit-cluster-b
 
 这样 cluster-a 和 cluster-b 可以共享同一套 base，但各自使用不同 overlay。
 
+业务镜像 tag 同时写在根目录 `k8s/kustomization.yaml` 和各环境 overlay 的 `kustomization.yaml` 中。原因是：cluster-a 可以通过根目录 `k8s` 部署，而 cluster-b 的 Argo CD Application 直接指向 `k8s/overlays/sit-cluster-b`；如果镜像 tag 只写在根目录，直接指向 overlay 的集群不会感知新版本。
+
 当前 cluster-b overlay 已将 MySQL EndpointSlice 地址替换为：
 
 ```text

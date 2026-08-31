@@ -3,5 +3,16 @@ kind: Kustomization
 resources:
   - ../../base
   - env-config.yaml
+
+# Keep image tags here as well as in the root kustomization, because some
+# Argo CD Applications point directly at this overlay.
+images:
+  - name: ghcr.io/xiaopanyz-max/bank-customer-service
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
+  - name: ghcr.io/xiaopanyz-max/bank-account-service
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
+  - name: ghcr.io/xiaopanyz-max/bank-api-gateway
+    newTag: sha-fd6cd6a21969df704bfb0c3772d4ec6e91c09c47
+
 patches:
   - path: replicas-patch.yaml
