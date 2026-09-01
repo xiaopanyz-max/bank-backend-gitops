@@ -32,10 +32,10 @@ The local SIT A/B traffic entrypoint is managed in `infra/nginx/nginx.conf`.
 Current route:
 
 - `127.0.0.1:18080` -> local nginx.
-- nginx -> cluster-a `192.168.30.130:30080` with weight `3`.
+- nginx -> cluster-a `192.168.30.130:30080` with weight `9`.
 - nginx -> cluster-b `10.46.132.20:30080` with weight `1`.
 
-This gives an approximate 75% / 25% split for local gray testing. See `infra/nginx/README.md` for the operating guide and config explanation.
+This gives an approximate 90% / 10% split for local gray testing. See `infra/nginx/README.md` for the operating guide and config explanation.
 
 ## Local secrets
 

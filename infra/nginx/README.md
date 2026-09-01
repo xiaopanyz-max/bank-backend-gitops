@@ -23,7 +23,7 @@ http://127.0.0.1:18080
 本机 nginx
   ↓
 upstream bank_gateway
-  ├── cluster-a: 192.168.30.130:30080，weight=3
+  ├── cluster-a: 192.168.30.130:30080，weight=9
   └── cluster-b: 10.46.132.20:30080，weight=1
   ↓
 api-gateway
@@ -34,11 +34,11 @@ customer-service / account-service
 当前权重大约是：
 
 ```text
-cluster-a: 75%
-cluster-b: 25%
+cluster-a: 90%
+cluster-b: 10%
 ```
 
-nginx 的 `weight` 是相对权重，不是严格百分比。请求量少时可能看起来不均匀，请求量多时会更接近 3:1。
+nginx 的 `weight` 是相对权重，不是严格百分比。请求量少时可能看起来不均匀，请求量多时会更接近 9:1。
 
 ## 配置文件说明
 
@@ -46,7 +46,7 @@ nginx 的 `weight` 是相对权重，不是严格百分比。请求量少时可�
 
 ```nginx
 upstream bank_gateway {
-    server 192.168.30.130:30080 weight=3;
+    server 192.168.30.130:30080 weight=9;
     server 10.46.132.20:30080 weight=1;
 }
 ```
@@ -55,7 +55,7 @@ upstream bank_gateway {
 
 - `192.168.30.130:30080`：cluster-a 的 api-gateway NodePort。
 - `10.46.132.20:30080`：cluster-b 的 api-gateway NodePort。
-- `weight=3` 和 `weight=1`：表示 A:B 约为 3:1。
+- `weight=9` 和 `weight=1`：表示 A:B 约为 9:1。
 
 ```nginx
 server {

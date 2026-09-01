@@ -6,6 +6,7 @@ metadata:
 data:
   APP_ENV: SIT
   CLUSTER_NAME: bank-sit-b
+  GRAY_RELEASE: customer-query-gray-44af69d
   SPRING_PROFILES_ACTIVE: sit
   LOGGING_LEVEL_ROOT: INFO
   LOGGING_LEVEL_COM_EXAMPLE_BANK: DEBUG

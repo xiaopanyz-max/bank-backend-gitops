@@ -130,7 +130,7 @@ nginx 配置由 GitOps 仓库管理，位置是：
 infra/nginx/nginx.conf
 ```
 
-当前灰度比例约为 cluster-a 75%、cluster-b 25%。业务日志中通过 `cluster=bank-sit-a` 和 `cluster=bank-sit-b` 区分请求实际落到哪个集群。
+当前灰度比例约为 cluster-a 90%、cluster-b 10%。业务日志中通过 `cluster=bank-sit-a` 和 `cluster=bank-sit-b` 区分请求实际落到哪个集群。cluster-b 还配置了 `GRAY_RELEASE`，查询接口会额外输出 `GRAY_QUERY` 日志，用于区分灰度版本。
 
 网关路由示例：
 
