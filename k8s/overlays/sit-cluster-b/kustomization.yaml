@@ -8,11 +8,11 @@ resources:
 # cluster-b Argo CD Application points directly at this overlay.
 images:
   - name: ghcr.io/xiaopanyz-max/bank-customer-service
-    newTag: sha-3d92294e9235cabaadf15fd00ff9824b45309c24
+    newTag: sha-44af69d9637afb2a53b5411a2b2248374af407fa
   - name: ghcr.io/xiaopanyz-max/bank-account-service
-    newTag: sha-3d92294e9235cabaadf15fd00ff9824b45309c24
+    newTag: sha-44af69d9637afb2a53b5411a2b2248374af407fa
   - name: ghcr.io/xiaopanyz-max/bank-api-gateway
-    newTag: sha-3d92294e9235cabaadf15fd00ff9824b45309c24
+    newTag: sha-44af69d9637afb2a53b5411a2b2248374af407fa
 
 patches:
   - path: replicas-patch.yaml
